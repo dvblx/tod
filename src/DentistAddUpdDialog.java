@@ -17,10 +17,6 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
     private static final int H_B = 25;
     private final JTextPane txtFIO = new JTextPane();
     private final JTextPane txtExperience = new JTextPane();
-    private final JTextPane txtPhone = new JTextPane();
-    private final JTextPane txtHeadOfClinic = new JTextPane();
-    private final JTextPane txtFoundationYear = new JTextPane();
-    private final JTextPane txtCustomersCount = new JTextPane();
     private final DentistryFunctions dentistryFunctions = new DentistryFunctions();
     private final DentistFunctions dentistFunctions = new DentistFunctions();
     private JComboBox<String> clinic_select;
@@ -34,10 +30,10 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         this(null);
     }
 
-    public DentistAddUpdDialog(Entities.Dentistry dentistry) {
+    public DentistAddUpdDialog(Entities.Dentist dentist) {
         setLayout(null);
         buildFields();
-        initFields(dentistry);
+        initFields(dentist);
         buildButtons();
         setModal(true);
         setResizable(false);
@@ -54,7 +50,7 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
                 W_T, H_B));
         txtFIO.setBorder(BorderFactory.createEtchedBorder());
         add(txtFIO);
-        List<Entities.Dentistry> dentistryList = dentistryFunctions.get_dentistry();
+        List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
         String[] clinic_names = new String[dentistryList.size()];
         for (int i = 0; i<dentistryList.size(); i++){
             clinic_names[i] = dentistryList.get(i).getName();
@@ -76,6 +72,7 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
                 W_T, H_B));
         txtExperience.setBorder(BorderFactory.createEtchedBorder());
         add(txtExperience);
+        // ПЕРЕДЕЛАТЬ
         HashMap<String, Integer> dentist_types = dentistFunctions.get_types();
         Set<String> types = dentist_types.keySet();
         String[] types_array = new String[types.size()];
@@ -95,15 +92,20 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         add(type_select);
 
     }
-    public void initFields(Entities.Dentistry dentistry) {
-        if (dentistry != null) {
-            dentistId = dentistry.getDentistry_id();
-            txtFIO.setText(dentistry.getName());
-            txtExperience.setText(dentistry.getAddress());
-            txtPhone.setText(dentistry.getPhone());
-            txtHeadOfClinic.setText(dentistry.getHead_of_clinic());
-            txtFoundationYear.setText(String.valueOf(dentistry.getFoundation_year()));
-            txtCustomersCount.setText(String.valueOf(dentistry.getCustomer_count()));
+    public void initFields(Entities.Dentist dentist) {
+        if (dentist != null) {
+            dentistId = dentist.getDentist_id();
+            txtFIO.setText(dentist.getDentist_name());
+            List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
+            for (int i = 0; i< dentistryList.size(); i++){
+                if (dentistryList.get(i).getName().equals(dentist.getDentistry())){
+                    clinic_select.setSelectedIndex(i);
+                    break;
+                }
+            }
+            txtExperience.setText(String.valueOf(dentist.getExperience()));
+            HashMap<String, Integer> dentist_types = dentistFunctions.get_types();
+            type_select.setSelectedIndex(dentist_types.getOrDefault(dentist.getDentist_type(), 0));
         }
     }
     public void buildButtons() {
@@ -131,7 +133,7 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         return save;
     }
 
-    public Entities.Dentist getDentistry() {
+    public Entities.Dentist getDentist() {
         try {
             return new Entities.Dentist(dentistId, txtFIO.getText(),
                     Objects.requireNonNull(clinic_select.getSelectedItem()).toString(),

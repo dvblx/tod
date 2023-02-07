@@ -16,13 +16,14 @@ public class TimetableFunctions extends BaseFunctions{
                     String query = """
                             select timetable.tt_id, dentist.dentist_name, dentistry.dentistry_name,
                             week.day_name, timetable.admission_time from timetable\s
-                            join dentistry on dentistry.dentistry_id = timetable.dentistry_id\s
                             join dentist on dentist.dentist_id = timetable.dentist_id\s
-                            join week on week.day_id = timetable.day_id""" ;
+                            join dentistry on dentistry.dentistry_id = dentist.dentistry_id\s
+                            join week on week.day_id = timetable.day_id\s
+                            order by dentistry.dentistry_name, dentist.dentist_name, week.day_id""" ;
                     ResultSet rs = stmt.executeQuery(query);
                     while (rs.next()) {
-                        timeTable = new Entities.TimeTable(rs.getInt(1), rs.getInt(2), rs.getInt(3),
-                                rs.getInt(4), rs.getString(5));
+                        timeTable = new Entities.TimeTable(rs.getInt(1), rs.getString(2), rs.getString(3),
+                                rs.getString(4), rs.getString(5));
                         timeTableList.add(timeTable);
                     }
                     rs.close();
@@ -49,14 +50,14 @@ public class TimetableFunctions extends BaseFunctions{
                     String query = """
                             select timetable.tt_id, dentist.dentist_name, dentistry.dentistry_name,
                             week.day_name, timetable.admission_time from timetable\s
-                            join dentistry on dentistry.dentistry_id = timetable.dentistry_id\s
                             join dentist on dentist.dentist_id = timetable.dentist_id\s
+                            join dentistry on dentistry.dentistry_id = dentist.dentistry_id\s
                             join week on week.day_id = timetable.day_id\s
-                            where dentistry.dentistry_name = '""" + clinic_name + "'";
+                            where dentistry.dentistry_name = '""" + clinic_name + "' order by dentist.dentist_name, week.day_id";
                     ResultSet rs = stmt.executeQuery(query);
                     while (rs.next()) {
-                        timeTable = new Entities.TimeTable(rs.getInt(1), rs.getInt(2), rs.getInt(3),
-                                rs.getInt(4), rs.getString(5));
+                        timeTable = new Entities.TimeTable(rs.getInt(1), rs.getString(2), rs.getString(3),
+                                rs.getString(4), rs.getString(5));
                         timeTableList.add(timeTable);
                     }
                     rs.close();

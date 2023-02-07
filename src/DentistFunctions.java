@@ -84,7 +84,7 @@ public class DentistFunctions extends BaseFunctions{
                 PreparedStatement stmt = con.prepareStatement(insert);
                 stmt.setString(1, dentist.getDentist_name());
                 DentistryFunctions df = new DentistryFunctions();
-                List<Entities.Dentistry> list = df.get_dentistry();
+                List<Entities.Dentistry> list = df.get_all_dentistry();
                 for (Entities.Dentistry d: list){
                     if (d.getName().equals(dentist.getDentistry())){
                         stmt.setInt(2, d.getDentistry_id());
@@ -122,6 +122,34 @@ public class DentistFunctions extends BaseFunctions{
                     con.close();
                 }
                 return types;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
+    public Entities.Dentist get_one_dentist(int id) {
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                Statement stmt = con.createStatement();
+                String query = """
+                        select dentist.dentist_id, dentist.dentist_name, dentistry.dentistry_name,
+                        dentist.experience, dentist_type.type_name from dentist\s
+                        join dentistry on dentistry.dentistry_id = dentist.dentistry_id\s
+                        join dentist_type on dentist_type.type_id = dentist.dentist_type_id
+                        where dentist.dentist_id=""" + id;
+                ResultSet rs = stmt.executeQuery(query);
+                Entities.Dentist dentist1 = null;
+                while (rs.next()) {
+                    dentist1 = new Entities.Dentist(rs.getInt(1), rs.getString(2),rs.getString(3),
+                           rs.getInt(4), rs.getString(5));
+                }
+                rs.close();
+                stmt.close();
+                return dentist1;
+
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

@@ -4,6 +4,7 @@ import java.util.List;
 public class TimeTableTable extends AbstractTableModel {
     private static final String[] headers = {"ID", "Врач", "Клиника", "День","Время приёма"};
     private final List<Entities.TimeTable> timeTableList;
+    private final DentistFunctions dentistFunctions = new DentistFunctions();
 
     public TimeTableTable(List<Entities.TimeTable> ttlist) {
         this.timeTableList = ttlist;
@@ -29,9 +30,9 @@ public class TimeTableTable extends AbstractTableModel {
         Entities.TimeTable timeTable = timeTableList.get(row);
         return switch (col) {
             case 0 -> timeTable.getTt_id();
-            case 1 -> timeTable.getDentist_id();
-            case 2 -> timeTable.getDentistry_id();
-            case 3 -> timeTable.getDay_id();
+            case 1 -> timeTable.getDentist();
+            case 2 -> timeTable.getDentistry();
+            case 3 -> timeTable.getDay();
             default -> timeTable.getAdmission_time();
         };
     }

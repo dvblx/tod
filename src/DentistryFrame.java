@@ -113,7 +113,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
 
         }
         JMenuItem[] items = clinic_filling();
-        List<Entities.Dentistry> dentistries = dentistryFunctions.get_dentistry();
+        List<Entities.Dentistry> dentistries = dentistryFunctions.get_all_dentistry();
         for (int i = 0; i < items.length; i++) {
             //System.out.println(items[i].getActionCommand());
             if (action.equals(items[i].getActionCommand())) {
@@ -133,7 +133,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
             }
             case 2 -> {
                 clinic_select.setVisible(false);
-                List<Entities.Dentistry> dentistryList = dentistryFunctions.get_dentistry();
+                List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
                 DentistryTable dryt = new DentistryTable(dentistryList);
                 dTable.setModel(dryt);
             }
@@ -188,11 +188,34 @@ public class DentistryFrame extends JFrame implements ActionListener {
         }
     }
     public void editData(int category){
-        switch (category){
-            //case 1 -> editDentist();
-            case 2 -> editDentistry();
-            //case 3 -> editAppointment();
+        // 1 - врачи, 2 - клиники, 3 - приёмы, 4  - расписание
+        int sr = dTable.getSelectedRow();
+        if (sr != -1) {
+            switch (category){
+                case 1 -> {
+                    int id = Integer.parseInt(dTable.getModel().getValueAt(sr, 0).toString());
+                    DentistAddUpdDialog dentistAddUpdDialog =
+                            new DentistAddUpdDialog(dentistFunctions.get_one_dentist(id));
+
+                }
+                case 2 -> {
+                    int id = Integer.parseInt(dTable.getModel().getValueAt(sr, 0).toString());
+                    DentistryAddUpdDialog dentistryAddUpdDialog =
+                            new DentistryAddUpdDialog(dentistryFunctions.get_one_dentistry(id));
+                    saveDentistry(dentistryAddUpdDialog);
+                }
+                case 3 -> {
+                    System.out.println("3");
+                }
+                default -> {
+                    System.out.println("4");
+                }
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Вы должны выделить строку для редактирования");
         }
+
     }
     public void deleteData(int category){
         switch (category){
@@ -230,30 +253,19 @@ public class DentistryFrame extends JFrame implements ActionListener {
             else{
                 dentistryFunctions.addDentistry(dentistry);
             }
-            loadData(2);
+            loadData(category);
         }
     }
     private void saveDentist(DentistAddUpdDialog d){
         if (d.isSave()){
-            Entities.Dentist dentist= d.getDentistry();
+            Entities.Dentist dentist= d.getDentist();
             if (dentist.getDentist_id() != 0){
                 //dentistFunctions.updateDentist(dentist);
             }
             else{
                 dentistFunctions.addDentist(dentist);
             }
-            loadData(1);
-        }
-    }
-    private void editDentistry() {
-        int sr = dTable.getSelectedRow();
-        if (sr != -1) {
-            int id = Integer.parseInt(dTable.getModel().getValueAt(sr, 0).toString());
-            DentistryAddUpdDialog dentistryAddUpdDialog = new
-                    DentistryAddUpdDialog(dentistryFunctions.getDentistry(id));
-            saveDentistry(dentistryAddUpdDialog);
-        } else {
-            JOptionPane.showMessageDialog(this, "Вы должны выделить строку для редактирования");
+            loadData(category);
         }
     }
     private void deleteDentistry(){
@@ -288,7 +300,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
     }
     public JMenuItem[] clinic_filling(){
         clinic_select.removeAll();
-        List<Entities.Dentistry> dentistryList = dentistryFunctions.get_dentistry();
+        List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
         JMenuItem[] clinic_array = new JMenuItem[dentistryList.size()];
         List<JMenuItem> clinic_list= new ArrayList<>();
         for (int i = 0; i < dentistryList.size(); i++){

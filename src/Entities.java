@@ -200,9 +200,9 @@ public class Entities {
 
     public static class TimeTable {
         private int tt_id;
-        private int dentist_id;
-        private int dentistry_id;
-        private int day_id;
+        private String dentist;
+        private String dentistry;
+        private String day;
         String admission_time;
 
         public int getTt_id() {
@@ -213,28 +213,28 @@ public class Entities {
             this.tt_id = tt_id;
         }
 
-        public int getDentist_id() {
-            return dentist_id;
+        public String getDentist() {
+            return dentist;
         }
 
-        public void setDentist_id(int dentist_id) {
-            this.dentist_id = dentist_id;
+        public void setDentist(String dentist) {
+            this.dentist = dentist;
         }
 
-        public int getDentistry_id() {
-            return dentistry_id;
+        public String getDentistry() {
+            return dentistry;
         }
 
-        public void setDentistry_id(int dentistry_id) {
-            this.dentistry_id = dentistry_id;
+        public void setDentistry(String dentistry) {
+            this.dentistry = dentistry;
         }
 
-        public int getDay_id() {
-            return day_id;
+        public String getDay() {
+            return day;
         }
 
-        public void setDay_id(int day_id) {
-            this.day_id = day_id;
+        public void setDay(String day) {
+            this.day = day;
         }
 
         public String getAdmission_time() {return admission_time;}
@@ -242,11 +242,11 @@ public class Entities {
         public void setAdmission_time(String admission_time) {this.admission_time = admission_time;}
 
 
-        public TimeTable(int tt_id, int dentist_id, int dentistry_id, int day_id, String admission_time) {
+        public TimeTable(int tt_id, String dentist, String dentistry, String day, String admission_time) {
             this.tt_id = tt_id;
-            this.dentist_id = dentist_id;
-            this.dentistry_id = dentistry_id;
-            this.day_id = day_id;
+            this.dentist = dentist;
+            this.dentistry = dentistry;
+            this.day = day;
             this.admission_time = admission_time;
         }
 

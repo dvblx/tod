@@ -3,16 +3,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DentistryFunctions extends BaseFunctions {
-    private static final String[] week = new String[]{"Понедельник", "Вторник", "Среда", "Четверг",
-            "Пятница", "Суббота", "Воскресенье"};
     private final List<Entities.Dentistry> dentistryList = new ArrayList<>();
-    private final List<Entities.Dentist> dentistList = new ArrayList<>();
-    private final List<Entities.Appointments> appointmentsList = new ArrayList<>();
     private Entities.Dentistry dentistry;
-    private Entities.Dentist dentist;
-    private Entities.Appointments appointment;
 
-    public List<Entities.Dentistry> get_dentistry() {
+    public List<Entities.Dentistry> get_all_dentistry() {
         String[] s = connect_to_db();
         if (s != null) {
             try (Connection con = DriverManager.getConnection(s[0],
@@ -85,7 +79,7 @@ public class DentistryFunctions extends BaseFunctions {
         }
     }
 
-    public Entities.Dentistry getDentistry(int id) {
+    public Entities.Dentistry get_one_dentistry(int id) {
         String[] s = connect_to_db();
         if (s != null) {
             try (Connection con = DriverManager.getConnection(s[0],
