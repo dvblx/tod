@@ -27,17 +27,12 @@ public class AppointmentTable extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         Entities.Appointments appointments = appointmentsList.get(row);
-        switch (col) {
-            case 0:
-                return appointments.getId();
-            case 1:
-                return appointments.getDentist();
-            case 2:
-                return appointments.getDentistry();
-            case 3:
-                return appointments.getAppointment_day();
-            default:
-                return appointments.getAppointment_time();
-        }
+        return switch (col) {
+            case 0 -> appointments.getId();
+            case 1 -> appointments.getDentist();
+            case 2 -> appointments.getDentistry();
+            case 3 -> appointments.getAppointment_day();
+            default -> appointments.getAppointment_time();
+        };
     }
 }

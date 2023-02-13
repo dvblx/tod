@@ -38,4 +38,5 @@ public class DentistryTable extends AbstractTableModel {
             default -> dentistry.getCustomer_count();
         };
     }
+
 }

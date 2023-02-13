@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -5,6 +7,7 @@ import java.util.List;
 public class DentistryFunctions extends BaseFunctions {
     private final List<Entities.Dentistry> dentistryList = new ArrayList<>();
     private Entities.Dentistry dentistry;
+    private int number_of_report = 1;
 
     public List<Entities.Dentistry> get_all_dentistry() {
         String[] s = connect_to_db();
@@ -177,6 +180,44 @@ public class DentistryFunctions extends BaseFunctions {
             }
         }
         return null;
+    }
+    public String createReport(){
+        String[] headers = {"ID", "Название", "Адрес", "Телефон", "Заведующий клиникой",
+                "Год основания", "Количество клиентов"};
+        String name_of_report = "-";
+        try{
+            name_of_report = "report_number_" + number_of_report + ".csv";
+            File file = new File(name_of_report);
+            if (!file.exists()) {
+                file.createNewFile();
+                number_of_report++;
+            }
+            StringBuilder text = new StringBuilder();
+            List<Entities.Dentistry> dentistries = get_all_dentistry();
+            for (int i = 0; i<headers.length; i++){
+                if(i != headers.length-1) {text.append(headers[i]).append(", ");}
+                else {text.append(headers[i]).append("\n");}
+
+            }
+            for (Entities.Dentistry d: dentistries){
+                text.append(d.getDentistry_id()).append(", ");
+                text.append(d.getName()).append(", ");
+                text.append(d.getAddress()).append(", ");
+                text.append(d.getPhone()).append(", ");
+                text.append(d.getHead_of_clinic()).append(", ");
+                text.append(d.getFoundation_year()).append(", ");
+                text.append(d.getCustomer_count()).append("\n");
+            }
+            if (file.exists()) {
+                PrintWriter pw = new PrintWriter(file);
+                pw.println(text);
+                pw.close();
+            }
+        }
+        catch (Exception exc) {
+            System.out.print("Exeption");
+        }
+        return name_of_report;
     }
     // String[] s = connect_to_db();
 }

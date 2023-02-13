@@ -16,6 +16,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
     private static final String TIMETABLE = "TIMETABLE";
     private static final String DENTISTRY = "DENTISTRY";
     private static final String DENTIST = "DENTIST";
+    private static final String REPORT = "REPORT";
     private final JTable dTable = new JTable();
     private int category = 1;
     private final DentistFunctions dentistFunctions = new DentistFunctions();
@@ -66,6 +67,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
         btnPanel.add(createButton(gridbag, gbc, "Удалить", DELETE));
         btnPanel.add(createButton(gridbag, gbc, "Сортировать", SORT));
         btnPanel.add(createButton(gridbag, gbc, "Поиск", SEARCH));
+        btnPanel.add(createButton(gridbag, gbc, "Сохранить отчёт", REPORT));
         JPanel left = new JPanel();
         left.setLayout(new BorderLayout());
         left.add(btnPanel, BorderLayout.NORTH);
@@ -110,6 +112,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
             case DELETE -> deleteData(category);
             case SORT -> sortData(category);
             case SEARCH -> searchData(category);
+            case REPORT -> createReport(category);
 
         }
         JMenuItem[] items = clinic_filling();
@@ -242,6 +245,19 @@ public class DentistryFrame extends JFrame implements ActionListener {
                 searchDentistry(dentistrySearchDialog);
             }
             //case 3 -> sortAppointment();
+        }
+    }
+    public void createReport(int category){
+        switch (category){
+            case 2 ->{
+                String name_of_report = dentistryFunctions.createReport();
+                if (!name_of_report.equals("-")){
+                    JOptionPane.showMessageDialog(this, "Отчёт " + name_of_report + " успешно создан");
+                }
+                else{
+                    JOptionPane.showMessageDialog(this, "Произошла ошибка при создании отчёта");
+                }
+            }
         }
     }
     private void saveDentistry(DentistryAddUpdDialog d){
