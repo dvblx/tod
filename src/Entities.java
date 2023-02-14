@@ -203,7 +203,7 @@ public class Entities {
         private String dentist;
         private String dentistry;
         private String day;
-        String admission_time;
+        private String admission_time;
 
         public int getTt_id() {
             return tt_id;

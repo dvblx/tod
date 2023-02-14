@@ -181,19 +181,18 @@ public class DentistryFunctions extends BaseFunctions {
         }
         return null;
     }
-    public String createReport(){
+    public String createReport(List<Entities.Dentistry> dentistries){
         String[] headers = {"ID", "Название", "Адрес", "Телефон", "Заведующий клиникой",
                 "Год основания", "Количество клиентов"};
         String name_of_report = "-";
         try{
-            name_of_report = "report_number_" + number_of_report + ".csv";
+            name_of_report = "Клиники №" + number_of_report + ".csv";
             File file = new File(name_of_report);
             if (!file.exists()) {
                 file.createNewFile();
                 number_of_report++;
             }
             StringBuilder text = new StringBuilder();
-            List<Entities.Dentistry> dentistries = get_all_dentistry();
             for (int i = 0; i<headers.length; i++){
                 if(i != headers.length-1) {text.append(headers[i]).append(", ");}
                 else {text.append(headers[i]).append("\n");}

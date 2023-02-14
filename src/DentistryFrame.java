@@ -248,16 +248,48 @@ public class DentistryFrame extends JFrame implements ActionListener {
         }
     }
     public void createReport(int category){
+        // 1 - врачи, 2 - клиники, 3 - приёмы, 4  - расписание
+        String name_of_report = "-";
         switch (category){
-            case 2 ->{
-                String name_of_report = dentistryFunctions.createReport();
-                if (!name_of_report.equals("-")){
-                    JOptionPane.showMessageDialog(this, "Отчёт " + name_of_report + " успешно создан");
+            case 1 -> {
+                List<Entities.Dentist> dentists = new ArrayList<>();
+                for (int i = 0; i < dTable.getRowCount(); i++){
+                    dentists.add(new Entities.Dentist((Integer) dTable.getValueAt(i, 0),
+                            (String) dTable.getValueAt(i, 1),
+                            (String) dTable.getValueAt(i, 2), (Integer) dTable.getValueAt(i, 3),
+                            (String) dTable.getValueAt(i, 4)));
+
                 }
-                else{
-                    JOptionPane.showMessageDialog(this, "Произошла ошибка при создании отчёта");
-                }
+                name_of_report = dentistFunctions.createReport(dentists);
             }
+            case 2 -> {
+                List<Entities.Dentistry> dentistryList = new ArrayList<>();
+                for (int i = 0; i < dTable.getRowCount(); i++){
+                    dentistryList.add(new Entities.Dentistry((Integer) dTable.getValueAt(i, 0),
+                            (String) dTable.getValueAt(i, 1),
+                            (String) dTable.getValueAt(i, 2),
+                            (String) dTable.getValueAt(i, 3), (String) dTable.getValueAt(i, 4),
+                            (Integer) dTable.getValueAt(i, 5), (Integer) dTable.getValueAt(i, 6)));
+                }
+                name_of_report = dentistryFunctions.createReport(dentistryList);
+            }
+            case 4 -> {
+                List<Entities.TimeTable> timeTableList = new ArrayList<>();
+                for (int i =0; i < dTable.getRowCount(); i++){
+                    timeTableList.add(new Entities.TimeTable((Integer) dTable.getValueAt(i, 0),
+                            (String) dTable.getValueAt(i, 1),
+                            (String) dTable.getValueAt(i, 2), (String) dTable.getValueAt(i, 3),
+                            (String) dTable.getValueAt(i, 4)));
+                }
+                name_of_report = timetableFunctions.createReport(timeTableList);
+            }
+
+        }
+        if (!name_of_report.equals("-")){
+            JOptionPane.showMessageDialog(this, "Отчёт " + name_of_report + " успешно создан");
+        }
+        else{
+            JOptionPane.showMessageDialog(this, "Произошла ошибка при создании отчёта");
         }
     }
     private void saveDentistry(DentistryAddUpdDialog d){
@@ -275,11 +307,16 @@ public class DentistryFrame extends JFrame implements ActionListener {
     private void saveDentist(DentistAddUpdDialog d){
         if (d.isSave()){
             Entities.Dentist dentist= d.getDentist();
+            List<Entities.TimeTable> entries = d.getEntry();
             if (dentist.getDentist_id() != 0){
                 //dentistFunctions.updateDentist(dentist);
             }
             else{
                 dentistFunctions.addDentist(dentist);
+                for (Entities.TimeTable entry : entries) {
+                    timetableFunctions.addEntry(entry);
+                }
+
             }
             loadData(category);
         }

@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +8,7 @@ import java.util.List;
 public class DentistFunctions extends BaseFunctions{
     private final List<Entities.Dentist> dentistList = new ArrayList<>();
     private Entities.Dentist dentist;
+    private int number_of_report = 1;
     //private static final String[] week = new String[]{"Понедельник", "Вторник", "Среда", "Четверг","Пятница", "Суббота", "Воскресенье"};
 
 
@@ -155,5 +158,39 @@ public class DentistFunctions extends BaseFunctions{
             }
         }
         return null;
+    }
+    public String createReport(List<Entities.Dentist> dentists){
+        String[] headers = {"ID", "ФИО", "Клиника", "Стаж", "Специализация"};
+        String name_of_report = "-";
+        try{
+            name_of_report = "Врачи №" + number_of_report + ".csv";
+            File file = new File(name_of_report);
+            if (!file.exists()) {
+                file.createNewFile();
+                number_of_report++;
+            }
+            StringBuilder text = new StringBuilder();
+            for (int i = 0; i<headers.length; i++){
+                if(i != headers.length-1) {text.append(headers[i]).append(", ");}
+                else {text.append(headers[i]).append("\n");}
+
+            }
+            for (Entities.Dentist d: dentists){
+                text.append(d.getDentist_id()).append(", ");
+                text.append(d.getDentist_name()).append(", ");
+                text.append(d.getDentistry()).append(", ");
+                text.append(d.getExperience()).append(", ");
+                text.append(d.getDentist_type()).append("\n");
+            }
+            if (file.exists()) {
+                PrintWriter pw = new PrintWriter(file);
+                pw.println(text);
+                pw.close();
+            }
+        }
+        catch (Exception exc) {
+            System.out.print("Exeption");
+        }
+        return name_of_report;
     }
 }

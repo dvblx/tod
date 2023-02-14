@@ -2,10 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 public class DentistAddUpdDialog extends  JDialog implements ActionListener {
     private static final String SAVE = "Сохранить";
@@ -19,8 +19,12 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
     private final JTextPane txtExperience = new JTextPane();
     private final DentistryFunctions dentistryFunctions = new DentistryFunctions();
     private final DentistFunctions dentistFunctions = new DentistFunctions();
+    private final TimetableFunctions timetableFunctions = new TimetableFunctions();
     private JComboBox<String> clinic_select;
     private JComboBox<String> type_select;
+    private JCheckBox[] days;
+    private JTextPane[] time;
+    private HashMap<Integer, String> weekHashMap = timetableFunctions.get_week();
 
     private int dentistId = 0;
 
@@ -37,13 +41,13 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         buildButtons();
         setModal(true);
         setResizable(false);
-        setBounds(300, 300, 450, 200);
+        setBounds(300, 300, 450, 400);
         setVisible(true);
     }
 
     public void buildFields() {
         JLabel lblFIO = new JLabel("ФИО:");
-        lblFIO.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblFIO.setHorizontalAlignment(SwingConstants.LEFT);
         lblFIO.setBounds(new Rectangle(PAD, 0 * H_B + PAD, W_L, H_B));
         add(lblFIO);
         txtFIO.setBounds(new Rectangle(W_L + 2 * PAD, 0 * H_B + PAD,
@@ -57,7 +61,7 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         }
         clinic_select = new JComboBox<>(clinic_names);
         JLabel lblADR = new JLabel("Клиника:");
-        lblADR.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblADR.setHorizontalAlignment(SwingConstants.LEFT);
         lblADR.setBounds(new Rectangle(PAD, 1 * H_B + PAD, W_L, H_B));
         add(lblADR);
         clinic_select.setBounds(new Rectangle(W_L + 2 * PAD, 1 * H_B + PAD,
@@ -65,7 +69,7 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         clinic_select.setBorder(BorderFactory.createEtchedBorder());
         add(clinic_select);
         JLabel lblPHN = new JLabel("Стаж:");
-        lblPHN.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblPHN.setHorizontalAlignment(SwingConstants.LEFT);
         lblPHN.setBounds(new Rectangle(PAD, 2 * H_B + PAD, W_L, H_B));
         add(lblPHN);
         txtExperience.setBounds(new Rectangle(W_L + 2 * PAD, 2 * H_B + PAD,
@@ -83,13 +87,44 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         }
         type_select = new JComboBox<>(types_array);
         JLabel lblHOC = new JLabel("Специализация:");
-        lblHOC.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblHOC.setHorizontalAlignment(SwingConstants.LEFT);
         lblHOC.setBounds(new Rectangle(PAD, 3 * H_B + PAD, W_L, H_B));
         add(lblHOC);
         type_select.setBounds(new Rectangle(W_L + 2 * PAD, 3 * H_B + PAD, W_T,
                 H_B));
         type_select.setBorder(BorderFactory.createEtchedBorder());
         add(type_select);
+
+        JLabel info = new JLabel("Расписание: (день - часы приёма)");
+        info.setHorizontalAlignment(SwingConstants.CENTER);
+        info.setBounds(new Rectangle(PAD, 4 * H_B + PAD, 450, H_B));
+        add(info);
+        int y = 5;
+        days = new JCheckBox[weekHashMap.size()];
+        time = new JTextPane[weekHashMap.size()];
+        int n = 0;
+        for (int k = 1; k <= weekHashMap.size(); k++){
+            days[n] = new JCheckBox(weekHashMap.get(k));
+            days[n].setHorizontalAlignment(SwingConstants.LEFT);
+            days[n].setBounds(new Rectangle(PAD, y * H_B + PAD, W_L+20, H_B));
+
+            time[n] = new JTextPane();
+            time[n].setBounds(new Rectangle(W_L + 2 * PAD, y * H_B + PAD,
+                    W_T-20, H_B));
+            time[n].setBorder(BorderFactory.createEtchedBorder());
+            time[n].setVisible(false);
+            int finalN = n;
+            days[n].addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    time[finalN].setVisible(e.getStateChange() == ItemEvent.SELECTED);
+                }
+            });
+            add(time[n]);
+            add(days[n]);
+            n++;
+            y++;
+        }
 
     }
     public void initFields(Entities.Dentist dentist) {
@@ -112,12 +147,12 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         JButton btnSave = new JButton("Сохранить");
         btnSave.setActionCommand(SAVE);
         btnSave.addActionListener(this);
-        btnSave.setBounds(new Rectangle(PAD, 5 * H_B + PAD, W_B, H_B));
+        btnSave.setBounds(new Rectangle(PAD, 12 * H_B + PAD, W_B, H_B));
         add(btnSave);
         JButton btnCancel = new JButton("Закрыть");
         btnCancel.setActionCommand(CANCEL);
         btnCancel.addActionListener(this);
-        btnCancel.setBounds(new Rectangle(W_B + 2 * PAD, 5 * H_B + PAD, W_B,
+        btnCancel.setBounds(new Rectangle(W_B + 2 * PAD, 12 * H_B + PAD, W_B,
                 H_B));
         add(btnCancel);
     }
@@ -145,5 +180,16 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
                     0, Objects.requireNonNull(type_select.getSelectedItem()).toString());
         }
 
+    }
+    public List<Entities.TimeTable> getEntry(){
+        List<Entities.TimeTable> entries = new ArrayList<>();
+        for (int i = 0; i<days.length; i++){
+            if(days[i].isSelected()){
+                entries.add(new Entities.TimeTable(dentistId, txtFIO.getText(),
+                        Objects.requireNonNull(clinic_select.getSelectedItem()).toString(),
+                        weekHashMap.get(i+1), time[i].getText()));
+            }
+        }
+        return entries;
     }
 }
