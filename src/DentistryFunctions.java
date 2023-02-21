@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DentistryFunctions extends BaseFunctions {
@@ -175,6 +176,33 @@ public class DentistryFunctions extends BaseFunctions {
                 }
                 return dentistryList;
 
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
+    public List<String> get_types_in_one_clinic(int clinic_id){
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                List<String> types = new ArrayList<>();
+                try {
+                    Statement stmt = con.createStatement();
+                    String query = "select distinct dentist_type.type_name from dentist join dentist_type\n" +
+                            "on dentist.dentist_type_id = dentist_type.type_id where dentist.dentistry_id = " + clinic_id;
+                    ResultSet rs = stmt.executeQuery(query);
+                    while (rs.next()) {
+                        types.add(rs.getString(1));
+                    }
+                    rs.close();
+                    stmt.close();
+
+                } finally {
+                    con.close();
+                }
+                return types;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

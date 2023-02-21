@@ -355,7 +355,6 @@ public class DentistryFrame extends JFrame implements ActionListener {
         clinic_select.removeAll();
         List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
         JMenuItem[] clinic_array = new JMenuItem[dentistryList.size()];
-        List<JMenuItem> clinic_list= new ArrayList<>();
         for (int i = 0; i < dentistryList.size(); i++){
             clinic_array[i] = new JMenuItem(dentistryList.get(i).getName());
             clinic_array[i].setActionCommand(dentistryList.get(i).getName());

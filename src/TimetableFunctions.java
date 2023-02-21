@@ -133,6 +133,33 @@ public class TimetableFunctions extends BaseFunctions{
             }
         }
     }
+    public HashMap<Integer, String> get_one_dentist_timetable(int id){
+        HashMap<Integer, String> week = get_week();
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                HashMap<Integer, String> d_timetable = new HashMap<>();
+                try {
+                    Statement stmt = con.createStatement();
+                    String query = "select day_id from timetable where dentist_id = " + id;
+                    ResultSet rs = stmt.executeQuery(query);
+                    while (rs.next()) {
+                        d_timetable.put(rs.getInt(1), week.get(rs.getInt(1)));
+                    }
+                    rs.close();
+                    stmt.close();
+
+                } finally {
+                    con.close();
+                }
+                return d_timetable;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
     public String createReport(List<Entities.TimeTable> entries){
         String[] headers = {"ID", "Врач", "Клиника", "День", "Время"};
         String name_of_report = "-";
