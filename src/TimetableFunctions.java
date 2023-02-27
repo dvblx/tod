@@ -133,6 +133,22 @@ public class TimetableFunctions extends BaseFunctions{
             }
         }
     }
+    public void deleteEntry(int dentist_id, int day_id){
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                String del = "DELETE FROM timetable WHERE dentist_id = ? and day_id = ?";
+                PreparedStatement stmt = con.prepareStatement(del);
+                stmt.setInt(1, dentist_id);
+                stmt.setInt(2, day_id);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
     public HashMap<Integer, String> get_one_dentist_timetable(int id){
         HashMap<Integer, String> week = get_week();
         String[] s = connect_to_db();
@@ -142,10 +158,10 @@ public class TimetableFunctions extends BaseFunctions{
                 HashMap<Integer, String> d_timetable = new HashMap<>();
                 try {
                     Statement stmt = con.createStatement();
-                    String query = "select day_id from timetable where dentist_id = " + id;
+                    String query = "select day_id, admission_time from timetable where dentist_id = " + id;
                     ResultSet rs = stmt.executeQuery(query);
                     while (rs.next()) {
-                        d_timetable.put(rs.getInt(1), week.get(rs.getInt(1)));
+                        d_timetable.put(rs.getInt(1), rs.getString(2));
                     }
                     rs.close();
                     stmt.close();

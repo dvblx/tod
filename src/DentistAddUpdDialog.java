@@ -22,9 +22,10 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
     private final TimetableFunctions timetableFunctions = new TimetableFunctions();
     private JComboBox<String> clinic_select;
     private JComboBox<String> type_select;
-    private JCheckBox[] days;
-    private JTextPane[] time;
     private HashMap<Integer, String> weekHashMap = timetableFunctions.get_week();
+    private JCheckBox[] days = new JCheckBox[weekHashMap.size()];
+    private JTextPane[] time = new JTextPane[weekHashMap.size()];
+
 
     private int dentistId = 0;
 
@@ -100,8 +101,6 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         info.setBounds(new Rectangle(PAD, 4 * H_B + PAD, 450, H_B));
         add(info);
         int y = 5;
-        days = new JCheckBox[weekHashMap.size()];
-        time = new JTextPane[weekHashMap.size()];
         int n = 0;
         for (int k = 1; k <= weekHashMap.size(); k++){
             days[n] = new JCheckBox(weekHashMap.get(k));
@@ -140,7 +139,19 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
             }
             txtExperience.setText(String.valueOf(dentist.getExperience()));
             HashMap<String, Integer> dentist_types = dentistFunctions.get_types();
-            type_select.setSelectedIndex(dentist_types.getOrDefault(dentist.getDentist_type(), 0));
+            type_select.setSelectedIndex(dentist_types.getOrDefault(dentist.getDentist_type(), 0)-2);
+            HashMap<Integer, String> doc_tt = timetableFunctions.get_one_dentist_timetable(dentistId);
+            for (int k = 1; k <= weekHashMap.size(); k++){
+                for (Integer day: doc_tt.keySet()){
+                    if (k == day){
+                        days[k-1].setSelected(true);
+
+                        time[k-1].setText(doc_tt.get(k));
+                        break;
+                    }
+                }
+            }
+
         }
     }
     public void buildButtons() {
@@ -184,6 +195,7 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
     public List<Entities.TimeTable> getEntry(){
         List<Entities.TimeTable> entries = new ArrayList<>();
         for (int i = 0; i<days.length; i++){
+            timetableFunctions.deleteEntry(dentistId, i+1);
             if(days[i].isSelected()){
                 entries.add(new Entities.TimeTable(dentistId, txtFIO.getText(),
                         Objects.requireNonNull(clinic_select.getSelectedItem()).toString(),

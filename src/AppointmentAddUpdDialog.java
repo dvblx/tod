@@ -35,6 +35,7 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     private JButton btnSave = new JButton("Сохранить");
     private JButton btnCancel = new JButton("Закрыть");
     private boolean save = false;
+    private int appoontmentId = 0;
 
     public AppointmentAddUpdDialog(){this(null);}
     public AppointmentAddUpdDialog(Entities.Appointments appointments){
@@ -66,15 +67,17 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
         btnCancel.setVisible(false);
     }
     public void buildFields() {
-        JLabel сSelect = new JLabel("Выбор клиники");
-        сSelect.setHorizontalAlignment(SwingConstants.LEFT);
-        сSelect.setBounds(new Rectangle(PAD, 0 * H_B + PAD, W_L, H_B));
-        add(сSelect);
+        JLabel cSelect = new JLabel("Выбор клиники");
+        cSelect.setHorizontalAlignment(SwingConstants.LEFT);
+        cSelect.setBounds(new Rectangle(PAD, 0 * H_B + PAD, W_L, H_B));
+        add(cSelect);
         List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
+        HashMap<String, Integer> clinic_dict = new HashMap<>();
         String[] clinic_names = new String[dentistryList.size()+1];
         clinic_names[0] = "-";
         for (int i = 1; i<=dentistryList.size(); i++){
             clinic_names[i] = dentistryList.get(i-1).getName();
+            clinic_dict.put(dentistryList.get(i-1).getName(), dentistryList.get(i-1).getDentistry_id());
         }
         clinic_select = new JComboBox<>(clinic_names);
         clinic_select.setBounds(new Rectangle(W_L + 2 * PAD, 0 * H_B + PAD,
@@ -87,7 +90,7 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                 if (!e.getItem().equals(clinic_names[0])){
                     clinic_name = String.valueOf(e.getItem());
                     setBounds(300, 300, 450, 200);
-                    List<String> dentist_types = dentistryFunctions.get_types_in_one_clinic(4);
+                    List<String> dentist_types = dentistryFunctions.get_types_in_one_clinic(clinic_dict.getOrDefault(clinic_name, 0));
                     String[] types_array = new String[dentist_types.size()+1];
                     types_array[0] = "-";
                     int i = 1;
@@ -113,10 +116,12 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                                 setBounds(300, 300, 450, 250);
                                 List<Entities.Dentist> dentists = dentistFunctions.filter_by_clinic(clinic_name);
                                 String[] dentist_arr = new String[dentists.size()+1];
+                                HashMap<String, Integer> doc_dict = new HashMap<>();
                                 dentist_arr[0] = "-";
                                 int i = 1;
                                 for (Entities.Dentist d: dentists){
                                     dentist_arr[i] = d.getDentist_name();
+                                    doc_dict.put(d.getDentist_name(), d.getDentist_id());
                                 }
                                 lblDoc.setHorizontalAlignment(SwingConstants.LEFT);
                                 lblDoc.setBounds(new Rectangle(PAD, 4 * H_B + PAD, W_L, H_B));
@@ -133,7 +138,7 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                                     public void itemStateChanged(ItemEvent e) {
                                         if (!e.getItem().equals(dentist_arr[0])){
                                             setBounds(300, 300, 450, 300);
-                                            HashMap<Integer, String> doc_tt = timetableFunctions.get_one_dentist_timetable(5);
+                                            HashMap<Integer, String> doc_tt = timetableFunctions.get_one_dentist_timetable(doc_dict.getOrDefault(doc_select.getSelectedItem(),0));
                                             String[] days_arr = new String[(doc_tt.size()*5)+1];
                                             days_arr[0] = "-";
                                             LocalDate localDate = LocalDate.now();
@@ -204,15 +209,19 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                 }
             }
         });
-
-
+    }
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        String action = ae.getActionCommand();
+        save = SAVE.equals(action);
+        setVisible(false);
     }
     public boolean isSave() {
         return save;
     }
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
+    public Entities.Appointments getAppointment(){
+        return new Entities.Appointments(appoontmentId, (String) doc_select.getSelectedItem(), (String) clinic_select.getSelectedItem(),
+                (String) day_select.getSelectedItem(), "8:00:00");
     }
     //LocalDate localDate = LocalDate.now();
     //localDate = localDate.minusDays(1);
@@ -220,5 +229,6 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     //calendar.add(Calendar.DAY_OF_MONTH, 5);
     //System.out.println(localDate);
     //System.out.println(day.getValue());
+
 
 }

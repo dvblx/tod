@@ -199,6 +199,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
                     int id = Integer.parseInt(dTable.getModel().getValueAt(sr, 0).toString());
                     DentistAddUpdDialog dentistAddUpdDialog =
                             new DentistAddUpdDialog(dentistFunctions.get_one_dentist(id));
+                    saveDentist(dentistAddUpdDialog);
 
                 }
                 case 2 -> {
@@ -222,9 +223,9 @@ public class DentistryFrame extends JFrame implements ActionListener {
     }
     public void deleteData(int category){
         switch (category){
-            //case 1 -> editDentist();
+            //case 1 -> deleteDentist();
             case 2 -> deleteDentistry();
-            //case 3 -> editAppointment();
+            //case 3 -> deleteAppointment();
         }
     }
     public void sortData(int category){
@@ -273,6 +274,16 @@ public class DentistryFrame extends JFrame implements ActionListener {
                 }
                 name_of_report = dentistryFunctions.createReport(dentistryList);
             }
+            case 3 -> {
+                List<Entities.Appointments> appointmentsList = new ArrayList<>();
+                for (int i = 0; i< dTable.getRowCount(); i++){
+                    appointmentsList.add(new Entities.Appointments((Integer) dTable.getValueAt(i, 0),
+                            (String) dTable.getValueAt(i, 1), (String) dTable.getValueAt(i, 2),
+                            (String) dTable.getValueAt(i, 3), (String) dTable.getValueAt(i, 4)));
+
+                }
+                name_of_report = appointmentFunctions.createReport(appointmentsList);
+            }
             case 4 -> {
                 List<Entities.TimeTable> timeTableList = new ArrayList<>();
                 for (int i =0; i < dTable.getRowCount(); i++){
@@ -308,16 +319,9 @@ public class DentistryFrame extends JFrame implements ActionListener {
         if (d.isSave()){
             Entities.Dentist dentist= d.getDentist();
             List<Entities.TimeTable> entries = d.getEntry();
-            if (dentist.getDentist_id() != 0){
-                //dentistFunctions.updateDentist(dentist);
-            }
-            else{
-                dentistFunctions.addDentist(dentist);
-                for (Entities.TimeTable entry : entries) {
-                    timetableFunctions.addEntry(entry);
-                }
-
-            }
+            if (dentist.getDentist_id() != 0){ dentistFunctions.updateDentist(dentist); }
+            else{ dentistFunctions.addDentist(dentist); }
+            for (Entities.TimeTable entry : entries) { timetableFunctions.addEntry(entry); }
             loadData(category);
         }
     }

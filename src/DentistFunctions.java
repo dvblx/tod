@@ -8,6 +8,7 @@ import java.util.List;
 public class DentistFunctions extends BaseFunctions{
     private final List<Entities.Dentist> dentistList = new ArrayList<>();
     private Entities.Dentist dentist;
+    private DentistryFunctions dentistryFunctions = new DentistryFunctions();
     private int number_of_report = 1;
     //private static final String[] week = new String[]{"Понедельник", "Вторник", "Среда", "Четверг","Пятница", "Суббота", "Воскресенье"};
 
@@ -102,6 +103,37 @@ public class DentistFunctions extends BaseFunctions{
                 throw new RuntimeException(e);
             }
         }
+    }
+    public void updateDentist(Entities.Dentist dentist){
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                String upd = "UPDATE DENTIST SET dentist_name = ?, dentistry_id = ? , experience = ?, dentist_type_id = ? " +
+                        "WHERE dentist_id = ?";
+                PreparedStatement stmt = con.prepareStatement(upd);
+                stmt.setString(1,dentist.getDentist_name() );
+                List<Entities.Dentistry> dentistries = dentistryFunctions.get_all_dentistry();
+                HashMap<String, Integer> types = get_types();
+                for (Entities.Dentistry dentistry: dentistries){
+                    if (dentistry.getName().equals(dentist.getDentistry())){
+                        stmt.setInt(2, dentistry.getDentistry_id());
+                        break;
+                    }
+                }
+                stmt.setInt(3, dentist.getExperience());
+                for (String type: types.keySet()){
+                    if (dentist.getDentist_type().equals(type)){
+                        stmt.setInt(4, types.get(type));
+                    }
+                }
+                stmt.setInt(5, dentist.getDentist_id());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
     public HashMap<String, Integer> get_types(){
         String[] s = connect_to_db();
