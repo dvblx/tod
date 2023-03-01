@@ -6,12 +6,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 
 public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
+    private AppointmentFunctions appointmentFunctions = new AppointmentFunctions();
     private static final String SAVE = "Сохранить";
     private static final String CANCEL = "Закрыть";
     private static final int PAD = 10;
@@ -140,6 +142,9 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                                             setBounds(300, 300, 450, 300);
                                             HashMap<Integer, String> doc_tt = timetableFunctions.get_one_dentist_timetable(doc_dict.getOrDefault(doc_select.getSelectedItem(),0));
                                             String[] days_arr = new String[(doc_tt.size()*5)+1];
+                                            List<String> days_list = new ArrayList<>();
+                                            days_list.add("-");
+                                            String date;
                                             days_arr[0] = "-";
                                             LocalDate localDate = LocalDate.now();
                                             DayOfWeek today = localDate.getDayOfWeek();
@@ -154,7 +159,13 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                                                     else{
                                                         difference = (day_num - today_number) + 7 * i;
                                                     }
-                                                    days_arr[k] = String.valueOf(localDate.plusDays(difference));
+                                                    date = String.valueOf(localDate.plusDays(difference));
+                                                    if (appointmentFunctions.checkAppointment((String) doc_select.getSelectedItem(),
+                                                            date, "8:00:00")){
+                                                        days_list.add(date);
+                                                        k++;
+                                                    }
+                                                    //days_arr[k] = date;
                                                     k++;
                                                 }
                                             }
@@ -162,8 +173,9 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                                             lblDay.setBounds(new Rectangle(PAD, 6 * H_B + PAD, W_L, H_B));
                                             add(lblDay);
                                             lblDay.setVisible(true);
-                                            Arrays.sort(days_arr);
-                                            day_select = new JComboBox<>(days_arr);
+                                            String[] days_array = days_list.toArray(new String[0]);
+                                            Arrays.sort(days_array);
+                                            day_select = new JComboBox<>(days_array);
                                             day_select.setBounds(new Rectangle(W_L + 2 * PAD, 6 * H_B + PAD, W_T,
                                                     H_B));
                                             day_select.setBorder(BorderFactory.createEtchedBorder());
@@ -213,14 +225,25 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         String action = ae.getActionCommand();
-        save = SAVE.equals(action);
+        if (action.equals(SAVE)){
+            Entities.Appointments appointment_to_check = getAppointment();
+            boolean check = appointmentFunctions.checkAppointment(appointment_to_check.getDentist(), appointment_to_check.getAppointment_day(),
+                    appointment_to_check.getAppointment_time());
+            if (check){
+                save = true;
+            }
+            else{
+                save = false;
+                JOptionPane.showMessageDialog(this, "Дата занята");
+            }
+        }
         setVisible(false);
     }
     public boolean isSave() {
         return save;
     }
     public Entities.Appointments getAppointment(){
-        return new Entities.Appointments(appoontmentId, (String) doc_select.getSelectedItem(), (String) clinic_select.getSelectedItem(),
+        return new Entities.Appointments(appoontmentId, (String) clinic_select.getSelectedItem(), (String) doc_select.getSelectedItem(),
                 (String) day_select.getSelectedItem(), "8:00:00");
     }
     //LocalDate localDate = LocalDate.now();

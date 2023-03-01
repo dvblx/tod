@@ -187,8 +187,10 @@ public class DentistryFrame extends JFrame implements ActionListener {
             }
             case 3 ->{
                 AppointmentAddUpdDialog appointmentAddUpdDialog = new AppointmentAddUpdDialog();
+                saveAppointment(appointmentAddUpdDialog);
             }
         }
+        loadData(category);
     }
     public void editData(int category){
         // 1 - врачи, 2 - клиники, 3 - приёмы, 4  - расписание
@@ -312,7 +314,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
             else{
                 dentistryFunctions.addDentistry(dentistry);
             }
-            loadData(category);
+            //loadData(category);
         }
     }
     private void saveDentist(DentistAddUpdDialog d){
@@ -322,7 +324,16 @@ public class DentistryFrame extends JFrame implements ActionListener {
             if (dentist.getDentist_id() != 0){ dentistFunctions.updateDentist(dentist); }
             else{ dentistFunctions.addDentist(dentist); }
             for (Entities.TimeTable entry : entries) { timetableFunctions.addEntry(entry); }
-            loadData(category);
+            //loadData(category);
+        }
+    }
+    private void saveAppointment(AppointmentAddUpdDialog d){
+        if (d.isSave()){
+            Entities.Appointments appointment = d.getAppointment();
+            if (appointment.getId() != 0){
+                System.out.println("upd");
+            }
+            else{ appointmentFunctions.addAppointment(appointment); }
         }
     }
     private void deleteDentistry(){

@@ -145,7 +145,6 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
                 for (Integer day: doc_tt.keySet()){
                     if (k == day){
                         days[k-1].setSelected(true);
-
                         time[k-1].setText(doc_tt.get(k));
                         break;
                     }
