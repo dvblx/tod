@@ -13,6 +13,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
     private static final String SORT= "SORT";
     private static final String SEARCH = "SEARCH";
     private static final String APPOINTMENT = "APPOINTMENT";
+    private static final String APPOINTMENT_PAST = "APPOINTMENT_PAST";
     private static final String TIMETABLE = "TIMETABLE";
     private static final String DENTISTRY = "DENTISTRY";
     private static final String DENTIST = "DENTIST";
@@ -23,6 +24,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
     private final DentistryFunctions dentistryFunctions = new DentistryFunctions();
     private final TimetableFunctions timetableFunctions = new TimetableFunctions();
     private final AppointmentFunctions appointmentFunctions = new AppointmentFunctions();
+    private final PreviousAppointmentFunctions previousAppointmentFunctions = new PreviousAppointmentFunctions();
     private final JMenu clinic_select;
 
     public DentistryFrame(){
@@ -50,8 +52,12 @@ public class DentistryFrame extends JFrame implements ActionListener {
         ptt.setActionCommand(TIMETABLE);
         ptt.addActionListener(this);
         menu.add(ptt);
-        JMenuItem pa = new JMenuItem("Приёмы");
-        pa.setActionCommand(APPOINTMENT);
+        JMenuItem fa = new JMenuItem("Предстоящие приёмы");
+        fa.setActionCommand(APPOINTMENT);
+        fa.addActionListener(this);
+        menu.add(fa);
+        JMenuItem pa = new JMenuItem("Прошедшие приёмы");
+        pa.setActionCommand(APPOINTMENT_PAST);
         pa.addActionListener(this);
         menu.add(pa);
         menuBar.add(menu);
@@ -75,7 +81,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
         add(new JScrollPane(dTable), BorderLayout.CENTER);
         setBounds(100, 200, 1250, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        previousAppointmentFunctions.migrate_appointments();
     }
     private JButton createButton(GridBagLayout gridbag, GridBagConstraints gbc, String title, String action) {
         JButton button = new JButton(title);
@@ -106,6 +112,10 @@ public class DentistryFrame extends JFrame implements ActionListener {
                 category = 4;
                 loadData(category);
             }
+            case APPOINTMENT_PAST -> {
+                category = 5;
+                loadData(category);
+            }
             case LOAD -> loadData(category);
             case ADD -> addData(category);
             case EDIT -> editData(category);
@@ -125,7 +135,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
         }
     }
     private void loadData(int number){
-        // 1 - врачи, 2 - клиники, 3 - приёмы, 4  - расписание
+        // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
         switch (number) {
             case 1 -> {
                 clinic_select.setVisible(true);
@@ -143,7 +153,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
             case 3 -> {
                 clinic_select.setVisible(true);
                 clinic_filling();
-                List<Entities.Appointments> appointmentsList = appointmentFunctions.get_appointments();
+                List<Entities.ForthcomingAppointment> appointmentsList = appointmentFunctions.get_appointments();
                 AppointmentTable at = new AppointmentTable(appointmentsList);
                 dTable.setModel(at);
             }
@@ -154,10 +164,17 @@ public class DentistryFrame extends JFrame implements ActionListener {
                 TimeTableTable ttt = new TimeTableTable(timeTableList);
                 dTable.setModel(ttt);
              }
+            case 5 -> {
+                clinic_select.setVisible(true);
+                clinic_filling();
+                List<Entities.PreviousAppointment> previousAppointmentList = previousAppointmentFunctions.get_appointments();
+                PreviousAppointmentTable pat = new PreviousAppointmentTable(previousAppointmentList);
+                dTable.setModel(pat);
+            }
         }
     }
     private void getFilteredData(int category, String param){
-        // 1 - врачи, 2 - клиники, 3 - приёмы, 4  - расписание
+        // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
         switch (category){
             case 1 -> {
                 List<Entities.Dentist> dentistList = dentistFunctions.filter_by_clinic(param);
@@ -175,7 +192,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
 
     }
     private void addData(int category){
-        // 1 - врачи, 2 - клиники, 3 - приёмы, 4  - расписание
+        // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
         switch (category){
             case 1 ->{
                 DentistAddUpdDialog dentistAddUpdDialog = new DentistAddUpdDialog();
@@ -193,7 +210,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
         loadData(category);
     }
     public void editData(int category){
-        // 1 - врачи, 2 - клиники, 3 - приёмы, 4  - расписание
+        // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
         int sr = dTable.getSelectedRow();
         if (sr != -1) {
             switch (category){
@@ -213,10 +230,18 @@ public class DentistryFrame extends JFrame implements ActionListener {
                 case 3 -> {
                     System.out.println("3");
                 }
+                case 5 -> {
+                    int id = Integer.parseInt(dTable.getModel().getValueAt(sr, 0).toString());
+                    Entities.PreviousAppointment pa = previousAppointmentFunctions.get_one_appointment(id);
+                    PreviousAppointmentAddUpdDialog previousAppointmentAddUpdDialog =
+                            new PreviousAppointmentAddUpdDialog(pa);
+                    saveAppointment(previousAppointmentAddUpdDialog, pa);
+                }
                 default -> {
                     System.out.println("4");
                 }
             }
+            loadData(category);
 
         } else {
             JOptionPane.showMessageDialog(this, "Вы должны выделить строку для редактирования");
@@ -277,11 +302,12 @@ public class DentistryFrame extends JFrame implements ActionListener {
                 name_of_report = dentistryFunctions.createReport(dentistryList);
             }
             case 3 -> {
-                List<Entities.Appointments> appointmentsList = new ArrayList<>();
+                List<Entities.ForthcomingAppointment> appointmentsList = new ArrayList<>();
                 for (int i = 0; i< dTable.getRowCount(); i++){
-                    appointmentsList.add(new Entities.Appointments((Integer) dTable.getValueAt(i, 0),
+                    appointmentsList.add(new Entities.ForthcomingAppointment((Integer) dTable.getValueAt(i, 0),
                             (String) dTable.getValueAt(i, 1), (String) dTable.getValueAt(i, 2),
-                            (String) dTable.getValueAt(i, 3), (String) dTable.getValueAt(i, 4)));
+                            (String) dTable.getValueAt(i, 3), (String) dTable.getValueAt(i, 4),
+                            (String) dTable.getValueAt(i, 5)));
 
                 }
                 name_of_report = appointmentFunctions.createReport(appointmentsList);
@@ -329,11 +355,17 @@ public class DentistryFrame extends JFrame implements ActionListener {
     }
     private void saveAppointment(AppointmentAddUpdDialog d){
         if (d.isSave()){
-            Entities.Appointments appointment = d.getAppointment();
+            Entities.ForthcomingAppointment appointment = d.getAppointment();
             if (appointment.getId() != 0){
                 System.out.println("upd");
             }
             else{ appointmentFunctions.addAppointment(appointment); }
+        }
+    }
+    private void saveAppointment(PreviousAppointmentAddUpdDialog d, Entities.PreviousAppointment pa){
+        if (d.isSave()){
+            Entities.PreviousAppointment appointment = d.getAppointment(pa);
+            previousAppointmentFunctions.updateAppointment(appointment);
         }
     }
     private void deleteDentistry(){

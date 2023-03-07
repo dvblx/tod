@@ -114,7 +114,7 @@ public class DentistryFunctions extends BaseFunctions {
                     s[1], s[2])) {
                 String del = "DELETE FROM DENTISTRY WHERE dentistry_id = ?";
                 PreparedStatement stmt = con.prepareStatement(del);
-                stmt.setLong(1, id);
+                stmt.setInt(1, id);
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);

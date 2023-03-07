@@ -29,6 +29,7 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     JLabel lblSpec = new JLabel("Специализация:");
     JLabel lblDoc = new JLabel("Врач:");
     JLabel lblDay = new JLabel("Дата приёма:");
+    private JTextPane patient_input = new JTextPane();
     private JComboBox<String> type_select = new JComboBox<>(new String[]{"-"});
     private JComboBox<String> doc_select = new JComboBox<>(new String[]{"-"});
     private JComboBox<String> day_select = new JComboBox<>(new String[]{"-"});
@@ -40,7 +41,7 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     private int appoontmentId = 0;
 
     public AppointmentAddUpdDialog(){this(null);}
-    public AppointmentAddUpdDialog(Entities.Appointments appointments){
+    public AppointmentAddUpdDialog(Entities.ForthcomingAppointment appointments){
         setLayout(null);
         //buildButtons();
         buildFields();
@@ -54,12 +55,12 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     public void buildButtons() {
         btnSave.setActionCommand(SAVE);
         btnSave.addActionListener(this);
-        btnSave.setBounds(new Rectangle(PAD, 8 * H_B + PAD, W_B, H_B));
+        btnSave.setBounds(new Rectangle(PAD, 10 * H_B + PAD, W_B, H_B));
         btnSave.setVisible(true);
         add(btnSave);
         btnCancel.setActionCommand(CANCEL);
         btnCancel.addActionListener(this);
-        btnCancel.setBounds(new Rectangle(W_B + 2 * PAD, 8 * H_B + PAD, W_B,
+        btnCancel.setBounds(new Rectangle(W_B + 2 * PAD, 10 * H_B + PAD, W_B,
                 H_B));
         btnCancel.setVisible(true);
         add(btnCancel);
@@ -69,9 +70,17 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
         btnCancel.setVisible(false);
     }
     public void buildFields() {
+        JLabel patientName = new JLabel("ФИО пациента");
+        patientName.setHorizontalAlignment(SwingConstants.LEFT);
+        patientName.setBounds(new Rectangle(PAD, 0 * H_B + PAD, W_L, H_B));
+        add(patientName);
+        patient_input.setBounds(new Rectangle(W_L + 2 * PAD, 0 * H_B + PAD,
+                W_T, H_B));
+        patient_input.setBorder(BorderFactory.createEtchedBorder());
+        add(patient_input);
         JLabel cSelect = new JLabel("Выбор клиники");
         cSelect.setHorizontalAlignment(SwingConstants.LEFT);
-        cSelect.setBounds(new Rectangle(PAD, 0 * H_B + PAD, W_L, H_B));
+        cSelect.setBounds(new Rectangle(PAD, 2 * H_B + PAD, W_L, H_B));
         add(cSelect);
         List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
         HashMap<String, Integer> clinic_dict = new HashMap<>();
@@ -82,7 +91,7 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
             clinic_dict.put(dentistryList.get(i-1).getName(), dentistryList.get(i-1).getDentistry_id());
         }
         clinic_select = new JComboBox<>(clinic_names);
-        clinic_select.setBounds(new Rectangle(W_L + 2 * PAD, 0 * H_B + PAD,
+        clinic_select.setBounds(new Rectangle(W_L + 2 * PAD, 2 * H_B + PAD,
                 W_T, H_B));
         clinic_select.setBorder(BorderFactory.createEtchedBorder());
         add(clinic_select);
@@ -102,10 +111,10 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                     }
                     type_select = new JComboBox<>(types_array);
                     lblSpec.setHorizontalAlignment(SwingConstants.LEFT);
-                    lblSpec.setBounds(new Rectangle(PAD, 2 * H_B + PAD, W_L, H_B));
+                    lblSpec.setBounds(new Rectangle(PAD, 4 * H_B + PAD, W_L, H_B));
                     add(lblSpec);
                     lblSpec.setVisible(true);
-                    type_select.setBounds(new Rectangle(W_L + 2 * PAD, 2 * H_B + PAD, W_T,
+                    type_select.setBounds(new Rectangle(W_L + 2 * PAD, 4 * H_B + PAD, W_T,
                             H_B));
                     type_select.setBorder(BorderFactory.createEtchedBorder());
                     add(type_select);
@@ -126,11 +135,11 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                                     doc_dict.put(d.getDentist_name(), d.getDentist_id());
                                 }
                                 lblDoc.setHorizontalAlignment(SwingConstants.LEFT);
-                                lblDoc.setBounds(new Rectangle(PAD, 4 * H_B + PAD, W_L, H_B));
+                                lblDoc.setBounds(new Rectangle(PAD, 6 * H_B + PAD, W_L, H_B));
                                 add(lblDoc);
                                 lblDoc.setVisible(true);
                                 doc_select = new JComboBox<>(dentist_arr);
-                                doc_select.setBounds(new Rectangle(W_L + 2 * PAD, 4 * H_B + PAD, W_T,
+                                doc_select.setBounds(new Rectangle(W_L + 2 * PAD, 6 * H_B + PAD, W_T,
                                         H_B));
                                 doc_select.setBorder(BorderFactory.createEtchedBorder());
                                 add(doc_select);
@@ -170,13 +179,13 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                                                 }
                                             }
                                             lblDay.setHorizontalAlignment(SwingConstants.LEFT);
-                                            lblDay.setBounds(new Rectangle(PAD, 6 * H_B + PAD, W_L, H_B));
+                                            lblDay.setBounds(new Rectangle(PAD, 8 * H_B + PAD, W_L, H_B));
                                             add(lblDay);
                                             lblDay.setVisible(true);
                                             String[] days_array = days_list.toArray(new String[0]);
                                             Arrays.sort(days_array);
                                             day_select = new JComboBox<>(days_array);
-                                            day_select.setBounds(new Rectangle(W_L + 2 * PAD, 6 * H_B + PAD, W_T,
+                                            day_select.setBounds(new Rectangle(W_L + 2 * PAD, 8 * H_B + PAD, W_T,
                                                     H_B));
                                             day_select.setBorder(BorderFactory.createEtchedBorder());
                                             add(day_select);
@@ -184,7 +193,10 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
                                             day_select.addItemListener(new ItemListener() {
                                                 @Override
                                                 public void itemStateChanged(ItemEvent e) {
-                                                    if(!e.getItem().equals(days_arr[0])){ buildButtons(); }
+                                                    if(!e.getItem().equals(days_arr[0])){
+                                                        setBounds(300, 300, 450, 350);
+                                                        buildButtons();
+                                                    }
                                                     else{ hideButtons(); }
                                                 }
                                             });
@@ -226,7 +238,7 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     public void actionPerformed(ActionEvent ae) {
         String action = ae.getActionCommand();
         if (action.equals(SAVE)){
-            Entities.Appointments appointment_to_check = getAppointment();
+            Entities.ForthcomingAppointment appointment_to_check = getAppointment();
             boolean check = appointmentFunctions.checkAppointment(appointment_to_check.getDentist(), appointment_to_check.getAppointment_day(),
                     appointment_to_check.getAppointment_time());
             if (check){
@@ -242,9 +254,9 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     public boolean isSave() {
         return save;
     }
-    public Entities.Appointments getAppointment(){
-        return new Entities.Appointments(appoontmentId, (String) clinic_select.getSelectedItem(), (String) doc_select.getSelectedItem(),
-                (String) day_select.getSelectedItem(), "8:00:00");
+    public Entities.ForthcomingAppointment getAppointment(){
+        return new Entities.ForthcomingAppointment(appoontmentId, (String) clinic_select.getSelectedItem(), (String) doc_select.getSelectedItem(),
+                (String) day_select.getSelectedItem(), "8:00:00", patient_input.getText());
     }
     //LocalDate localDate = LocalDate.now();
     //localDate = localDate.minusDays(1);
@@ -252,6 +264,4 @@ public class AppointmentAddUpdDialog extends JDialog implements ActionListener {
     //calendar.add(Calendar.DAY_OF_MONTH, 5);
     //System.out.println(localDate);
     //System.out.println(day.getValue());
-
-
 }
