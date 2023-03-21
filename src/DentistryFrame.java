@@ -18,6 +18,8 @@ public class DentistryFrame extends JFrame implements ActionListener {
     private static final String DENTISTRY = "DENTISTRY";
     private static final String DENTIST = "DENTIST";
     private static final String REPORT = "REPORT";
+    private static final String FILLED = "Заполненные";
+    private static final String UNFILLED = "Незаполненные";
     private final JTable dTable = new JTable();
     private int category = 1;
     private final DentistFunctions dentistFunctions = new DentistFunctions();
@@ -26,6 +28,8 @@ public class DentistryFrame extends JFrame implements ActionListener {
     private final AppointmentFunctions appointmentFunctions = new AppointmentFunctions();
     private final PreviousAppointmentFunctions previousAppointmentFunctions = new PreviousAppointmentFunctions();
     private final JMenu clinic_select;
+    private final JMenu appointment_select;
+    private boolean filled = true;
 
     public DentistryFrame(){
         dTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -65,6 +69,17 @@ public class DentistryFrame extends JFrame implements ActionListener {
         menuBar.add(clinic_select);
         clinic_select.setVisible(false);
         setJMenuBar(menuBar);
+        appointment_select = new JMenu("Приёмы");
+        JMenuItem i1 = new JMenuItem(UNFILLED);
+        i1.setActionCommand(UNFILLED);
+        i1.addActionListener(this);
+        JMenuItem i2 = new JMenuItem(FILLED);
+        i2.setActionCommand(FILLED);
+        i2.addActionListener(this);
+        appointment_select.add(i1);
+        appointment_select.add(i2);
+        appointment_select.setVisible(false);
+        menuBar.add(appointment_select);
         JPanel btnPanel = new JPanel();
         btnPanel.setLayout(gridbag);
         btnPanel.add(createButton(gridbag, gbc, "Обновить", LOAD));
@@ -82,6 +97,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
         setBounds(100, 200, 1250, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         previousAppointmentFunctions.migrate_appointments();
+
     }
     private JButton createButton(GridBagLayout gridbag, GridBagConstraints gbc, String title, String action) {
         JButton button = new JButton(title);
@@ -123,7 +139,14 @@ public class DentistryFrame extends JFrame implements ActionListener {
             case SORT -> sortData(category);
             case SEARCH -> searchData(category);
             case REPORT -> createReport(category);
-
+            case UNFILLED -> {
+                filled = false;
+                loadData(category);
+            }
+            case FILLED ->{
+                filled = true;
+                loadData(category);
+            }
         }
         JMenuItem[] items = clinic_filling();
         List<Entities.Dentistry> dentistries = dentistryFunctions.get_all_dentistry();
@@ -139,6 +162,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
         switch (number) {
             case 1 -> {
                 clinic_select.setVisible(true);
+                appointment_select.setVisible(false);
                 clinic_filling();
                 List<Entities.Dentist> dentistList = dentistFunctions.get_dentists();
                 DentistTable dt = new DentistTable(dentistList);
@@ -146,12 +170,14 @@ public class DentistryFrame extends JFrame implements ActionListener {
             }
             case 2 -> {
                 clinic_select.setVisible(false);
+                appointment_select.setVisible(false);
                 List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
                 DentistryTable dryt = new DentistryTable(dentistryList);
                 dTable.setModel(dryt);
             }
             case 3 -> {
                 clinic_select.setVisible(true);
+                appointment_select.setVisible(false);
                 clinic_filling();
                 List<Entities.ForthcomingAppointment> appointmentsList = appointmentFunctions.get_appointments();
                 AppointmentTable at = new AppointmentTable(appointmentsList);
@@ -159,6 +185,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
             }
             case 4 -> {
                 clinic_select.setVisible(true);
+                appointment_select.setVisible(false);
                 clinic_filling();
                 List<Entities.TimeTable> timeTableList = timetableFunctions.get_timetable();
                 TimeTableTable ttt = new TimeTableTable(timeTableList);
@@ -166,8 +193,16 @@ public class DentistryFrame extends JFrame implements ActionListener {
              }
             case 5 -> {
                 clinic_select.setVisible(true);
+                appointment_select.setVisible(true);
                 clinic_filling();
-                List<Entities.PreviousAppointment> previousAppointmentList = previousAppointmentFunctions.get_appointments();
+                List<Entities.PreviousAppointment> previousAppointmentList;
+                if (filled){
+                    previousAppointmentList = previousAppointmentFunctions.get_filled_appointments();
+                }
+                else {
+                    previousAppointmentList = previousAppointmentFunctions.get_unfilled_appointments();
+                }
+
                 PreviousAppointmentTable pat = new PreviousAppointmentTable(previousAppointmentList);
                 dTable.setModel(pat);
             }
@@ -231,11 +266,13 @@ public class DentistryFrame extends JFrame implements ActionListener {
                     System.out.println("3");
                 }
                 case 5 -> {
-                    int id = Integer.parseInt(dTable.getModel().getValueAt(sr, 0).toString());
-                    Entities.PreviousAppointment pa = previousAppointmentFunctions.get_one_appointment(id);
-                    PreviousAppointmentAddUpdDialog previousAppointmentAddUpdDialog =
-                            new PreviousAppointmentAddUpdDialog(pa);
-                    saveAppointment(previousAppointmentAddUpdDialog, pa);
+                    if (!filled){
+                        int id = Integer.parseInt(dTable.getModel().getValueAt(sr, 0).toString());
+                        Entities.PreviousAppointment pa = previousAppointmentFunctions.get_one_appointment(id);
+                        PreviousAppointmentAddUpdDialog previousAppointmentAddUpdDialog =
+                                new PreviousAppointmentAddUpdDialog(pa);
+                        saveAppointment(previousAppointmentAddUpdDialog, pa);
+                    }
                 }
                 default -> {
                     System.out.println("4");
@@ -366,6 +403,9 @@ public class DentistryFrame extends JFrame implements ActionListener {
         if (d.isSave()){
             Entities.PreviousAppointment appointment = d.getAppointment(pa);
             previousAppointmentFunctions.updateAppointment(appointment);
+        }
+        else{
+            previousAppointmentFunctions.deleteAppointment(pa.getPrevious_appointment_id());
         }
     }
     private void deleteDentistry(){

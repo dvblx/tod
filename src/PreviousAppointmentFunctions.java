@@ -2,7 +2,6 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class PreviousAppointmentFunctions extends BaseFunctions{
@@ -13,7 +12,7 @@ public class PreviousAppointmentFunctions extends BaseFunctions{
     private int number_of_report = 1;
 
 
-    public List<Entities.PreviousAppointment> get_appointments() {
+    public List<Entities.PreviousAppointment> get_filled_appointments() {
         String[] s = connect_to_db();
         if (s != null) {
             try (Connection con = DriverManager.getConnection(s[0],
@@ -27,7 +26,48 @@ public class PreviousAppointmentFunctions extends BaseFunctions{
                             "previousappointments.appointment_day, previousappointments.appointment_time, previousappointments.patient," +
                             "previousappointments.diagnosis, previousappointments.admission_price from previousappointments " +
                             "join dentist on previousappointments.dentist_id = dentist.dentist_id " +
-                            "join dentistry on dentist.dentistry_id = dentistry.dentistry_id";
+                            "join dentistry on dentist.dentistry_id = dentistry.dentistry_id" +
+                            " where diagnosis != 'нужно указать' or admission_price != 0 ";
+                    ResultSet rs = stmt.executeQuery(query);
+                    //PreviousAppointment(int previous_appointment_id, String dentistry, String dentist, String appointment_day,
+                    //        String appointment_time, String patient, String diagnosis, int admission_price)
+                    while (rs.next()) {
+                        previousAppointment = new Entities.PreviousAppointment(rs.getInt(1), rs.getString(2),
+                                rs.getString(3), String.valueOf(rs.getDate(4)), String.valueOf(rs.getTime(5)),
+                                rs.getString(6), rs.getString(7), rs.getInt(8));
+                        previousAppointmentList.add(previousAppointment);
+
+                    }
+                    rs.close();
+                    stmt.close();
+
+                } finally {
+                    con.close();
+                }
+                return previousAppointmentList;
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
+    public List<Entities.PreviousAppointment> get_unfilled_appointments() {
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                previousAppointmentList.clear();
+                try {
+                    LocalDate localDate = LocalDate.now();
+                    LocalTime localTime = LocalTime.now();
+                    Statement stmt = con.createStatement();
+                    String query = "select previousappointments.previous_appointment_id, dentistry.dentistry_name, dentist.dentist_name, " +
+                            "previousappointments.appointment_day, previousappointments.appointment_time, previousappointments.patient," +
+                            "previousappointments.diagnosis, previousappointments.admission_price from previousappointments " +
+                            "join dentist on previousappointments.dentist_id = dentist.dentist_id " +
+                            "join dentistry on dentist.dentistry_id = dentistry.dentistry_id" +
+                            " where diagnosis = 'нужно указать' or admission_price = 0";
                     ResultSet rs = stmt.executeQuery(query);
                     //PreviousAppointment(int previous_appointment_id, String dentistry, String dentist, String appointment_day,
                     //        String appointment_time, String patient, String diagnosis, int admission_price)
@@ -63,7 +103,7 @@ public class PreviousAppointmentFunctions extends BaseFunctions{
                     LocalDate localDate = LocalDate.now();
                     LocalTime localTime = LocalTime.now();
                     Statement stmt = con.createStatement();
-                    String query = "select appointments.appointment_id, dentist.dentist_name, dentistry.dentistry_name,\n" +
+                    String query = "select appointments.appointment_id, dentistry.dentistry_name, dentist.dentist_name,\n" +
                             "appointments.appointment_day, appointments.appointment_time, appointments.patient from appointments \n" +
                             "join dentist on appointments.dentist_id = dentist.dentist_id\n" +
                             "join dentistry on dentist.dentistry_id = dentistry.dentistry_id\n" +
@@ -167,5 +207,18 @@ public class PreviousAppointmentFunctions extends BaseFunctions{
             }
         }
     }
-
+    public void deleteAppointment(int id) {
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                String del = "DELETE FROM previousappointments WHERE previous_appointment_id = ?";
+                PreparedStatement stmt = con.prepareStatement(del);
+                stmt.setInt(1, id);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }
