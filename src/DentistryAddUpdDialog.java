@@ -119,8 +119,12 @@ public class DentistryAddUpdDialog extends JDialog implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         String action = ae.getActionCommand();
-        save = SAVE.equals(action);
-        setVisible(false);
+        if (action.equals(SAVE)){
+            if (Validation()){
+                save = true;
+                setVisible(false);
+            }
+        }
     }
 
     public boolean isSave() {
@@ -138,6 +142,54 @@ public class DentistryAddUpdDialog extends JDialog implements ActionListener {
                     0);
         }
 
+    }
+    public boolean Validation(){
+        if (txtFIO.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Поле ввода ФИО не заполнено");
+            return false;
+        }
+        else if (txtPhone.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Поле ввода номера телефона не заполнено");
+            return false;
+        }
+        else if (txtAddress.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Поле ввода адреса не заполнено");
+            return false;
+        }
+        else if (txtCustomersCount.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Поле ввода количества клиентов не заполнено");
+            return false;
+        }
+        else if (txtFoundationYear.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Поле ввода года основания не заполнено");
+            return false;
+        }
+        else if (txtHeadOfClinic.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Поле ввода управляющего клиникой не заполнено");
+            return false;
+        }
+        else if (txtPhone.getText().length() != 11 || (txtPhone.getText().length() == 11 && txtPhone.getText().charAt(0) != '8'))
+        {
+            if (!(txtPhone.getText().length() == 12 && (txtPhone.getText().charAt(0) == '+') && (txtPhone.getText().charAt(1) == '7'))){
+                JOptionPane.showMessageDialog(this,"Некорректный формат номера телефона\n" +
+                        "Пример: 89281830269 или +79281830269");
+                return false;
+            }
+
+        }
+        try {
+            Integer.parseInt(txtFoundationYear.getText());
+        } catch (NumberFormatException e){
+            JOptionPane.showMessageDialog(this,"В поле ввода года основания нужно ввести число");
+            return false;
+        }
+        try {
+            Integer.parseInt(txtCustomersCount.getText());
+        } catch (NumberFormatException e){
+            JOptionPane.showMessageDialog(this,"В поле ввода количества клиентов нужно ввести число");
+            return false;
+        }
+        return true;
     }
 
 }

@@ -30,6 +30,7 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
     private int dentistId = 0;
 
     private boolean save = false;
+    private boolean sure = false;
 
     public DentistAddUpdDialog() {
         this(null);
@@ -51,8 +52,7 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
         lblFIO.setHorizontalAlignment(SwingConstants.LEFT);
         lblFIO.setBounds(new Rectangle(PAD, 0 * H_B + PAD, W_L, H_B));
         add(lblFIO);
-        txtFIO.setBounds(new Rectangle(W_L + 2 * PAD, 0 * H_B + PAD,
-                W_T, H_B));
+        txtFIO.setBounds(new Rectangle(W_L + 2 * PAD, 0 * H_B + PAD, W_T, H_B));
         txtFIO.setBorder(BorderFactory.createEtchedBorder());
         add(txtFIO);
         List<Entities.Dentistry> dentistryList = dentistryFunctions.get_all_dentistry();
@@ -170,8 +170,17 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
         String action = ae.getActionCommand();
-        save = SAVE.equals(action);
-        setVisible(false);
+        if (action.equals(SAVE)){
+            if (FieldsValidation()){
+                if (TimeTableValidation() || sure){
+                    save = true;
+                    setVisible(false);
+                }
+                else {
+                    sure = true;
+                }
+            }
+        }
     }
 
     public boolean isSave() {
@@ -202,5 +211,35 @@ public class DentistAddUpdDialog extends  JDialog implements ActionListener {
             }
         }
         return entries;
+    }
+    public boolean FieldsValidation(){
+        if (txtFIO.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Поле ввода ФИО не заполнено");
+            return false;
+        }
+        else if (txtExperience.getText().equals("")){
+            JOptionPane.showMessageDialog(this,"Поле ввода стажа не заполнено");
+            return false;
+        }
+        try{
+            Integer.parseInt(txtExperience.getText());
+        }catch (NumberFormatException e){
+            JOptionPane.showMessageDialog(this,"В поле ввода стажа нужно ввести число");
+            return false;
+        }
+        return true;
+    }
+    public boolean TimeTableValidation(){
+        int counter = 0;
+        for (JCheckBox day : days) {
+            if (day.isSelected()) {
+                counter++;
+            }
+        }
+        if (counter == 0){
+            JOptionPane.showMessageDialog(this,"Необходимо заполнить расписание");
+            return false;
+        }
+        return true;
     }
 }

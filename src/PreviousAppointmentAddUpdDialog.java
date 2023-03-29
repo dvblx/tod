@@ -1,5 +1,3 @@
-import org.postgresql.jdbc.PgArray;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -21,6 +19,7 @@ public class PreviousAppointmentAddUpdDialog extends JDialog implements ActionLi
     private JButton btnCancel = new JButton("Закрыть");
     private JCheckBox visit;
     private boolean save = false;
+    private boolean sure = false;
     private int appoontmentId = 0;
 
     public PreviousAppointmentAddUpdDialog(Entities.PreviousAppointment appointment) {
@@ -90,9 +89,17 @@ public class PreviousAppointmentAddUpdDialog extends JDialog implements ActionLi
     public void actionPerformed(ActionEvent e) {
         String action = e.getActionCommand();
         if (SAVE.equals(action)){
-            save = visit.isSelected();
+            if (sure){
+                save = visit.isSelected();
+                setVisible(false);
+            }
+            else{
+                JOptionPane.showMessageDialog(this,"Предупреждение: Вы собираетесь удалить данные о приёме");
+            }
+            sure = !sure;
+
         }
-        setVisible(false);
+
     }
 
 }
