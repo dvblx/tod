@@ -4,10 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class DentistryAddUpdDialog extends JDialog implements ActionListener {
-    // Заголовки кнопок
-    private static final String APPOINTMENT = "APPOINTMENT";
-    private static final String DENTISTRY = "DENTISTRY";
-    private static final String DENTIST = "DENTIST";
     private static final String SAVE = "Сохранить";
     private static final String CANCEL = "Закрыть";
     private static final int PAD = 10;

@@ -28,8 +28,10 @@ public class DentistryFrame extends JFrame implements ActionListener {
     private final AppointmentFunctions appointmentFunctions = new AppointmentFunctions();
     private final PreviousAppointmentFunctions previousAppointmentFunctions = new PreviousAppointmentFunctions();
     private final JMenu clinic_select;
+    private final JMenu doctor_select;
     private final JMenu appointment_select;
     private boolean filled = true;
+    private String selected_clinic_name;
 
     public DentistryFrame(){
         dTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -68,6 +70,9 @@ public class DentistryFrame extends JFrame implements ActionListener {
         clinic_select = new JMenu("Выбор клиники");
         menuBar.add(clinic_select);
         clinic_select.setVisible(false);
+        doctor_select = new JMenu("Выбор врача");
+        menuBar.add(doctor_select);
+        doctor_select.setVisible(false);
         setJMenuBar(menuBar);
         appointment_select = new JMenu("Приёмы");
         JMenuItem i1 = new JMenuItem(UNFILLED);
@@ -97,7 +102,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
         setBounds(100, 200, 1250, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         previousAppointmentFunctions.migrate_appointments();
-
+        selected_clinic_name = "-";
     }
     private JButton createButton(GridBagLayout gridbag, GridBagConstraints gbc, String title, String action) {
         JButton button = new JButton(title);
@@ -150,15 +155,28 @@ public class DentistryFrame extends JFrame implements ActionListener {
         }
         JMenuItem[] items = clinic_filling();
         List<Entities.Dentistry> dentistries = dentistryFunctions.get_all_dentistry();
+
         for (int i = 0; i < items.length; i++) {
             //System.out.println(items[i].getActionCommand());
             if (action.equals(items[i].getActionCommand())) {
-                getFilteredData(category, dentistries.get(i).getName());
+                getFilteredData(category, dentistries.get(i).getName(), "");
+                selected_clinic_name = dentistries.get(i).getName();
+                if (category == 5){doctor_select.setVisible(true);}
+            }
+        }
+
+        if (!selected_clinic_name.equals("-")){
+            JMenuItem[] items2 = doctor_filling(selected_clinic_name);
+            for (JMenuItem jMenuItem : items2) {
+                if (action.equals(jMenuItem.getActionCommand())) {
+                    getFilteredData(category, selected_clinic_name, jMenuItem.getActionCommand());
+                }
             }
         }
     }
     private void loadData(int number){
         // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
+        doctor_select.setVisible(false);
         switch (number) {
             case 1 -> {
                 clinic_select.setVisible(true);
@@ -208,23 +226,65 @@ public class DentistryFrame extends JFrame implements ActionListener {
             }
         }
     }
-    private void getFilteredData(int category, String param){
+    private void getFilteredData(int category, String param1, String param2){
         // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
         switch (category){
             case 1 -> {
-                List<Entities.Dentist> dentistList = dentistFunctions.filter_by_clinic(param);
+                List<Entities.Dentist> dentistList = dentistFunctions.filter_by_clinic(param1);
                 DentistTable dt = new DentistTable(dentistList);
                 dTable.setModel(dt);
             }
+            case 3 -> {
+                if (param2.equals("")){
+                    List<Entities.ForthcomingAppointment> forthcomingAppointmentList =
+                            appointmentFunctions.filter_by_clinic(param1);
+                    AppointmentTable fat = new AppointmentTable(forthcomingAppointmentList);
+                    dTable.setModel(fat);
+                }
+                else{
+                    List<Entities.ForthcomingAppointment> forthcomingAppointmentList =
+                            appointmentFunctions.get_one_doctor_appointments(param1, param2);
+                    AppointmentTable fat = new AppointmentTable(forthcomingAppointmentList);
+                    dTable.setModel(fat);
+                }
+
+            }
             case 4 -> {
-                List<Entities.TimeTable> timeTableList = timetableFunctions.filter_by_clinic(param);
+                List<Entities.TimeTable> timeTableList = timetableFunctions.filter_by_clinic(param1);
                 TimeTableTable ttt = new TimeTableTable(timeTableList);
                 dTable.setModel(ttt);
             }
-
-
+            case 5 ->{
+                if (param2.equals("")){
+                    if (filled){
+                        List<Entities.PreviousAppointment> previousAppointmentList =
+                                previousAppointmentFunctions.get_filled_appointments_with_filter_by_clinic(param1);
+                        PreviousAppointmentTable pat = new PreviousAppointmentTable(previousAppointmentList);
+                        dTable.setModel(pat);
+                    }
+                    else {
+                        List<Entities.PreviousAppointment> previousAppointmentList =
+                                previousAppointmentFunctions.get_unfilled_appointments_with_filter_by_clinic(param1);
+                        PreviousAppointmentTable pat = new PreviousAppointmentTable(previousAppointmentList);
+                        dTable.setModel(pat);
+                    }
+                }
+                else{
+                    if (filled){
+                        List<Entities.PreviousAppointment> previousAppointmentList =
+                                previousAppointmentFunctions.get_one_doctor_filled_appointments(param1, param2);
+                        PreviousAppointmentTable pat = new PreviousAppointmentTable(previousAppointmentList);
+                        dTable.setModel(pat);
+                    }
+                    else {
+                        List<Entities.PreviousAppointment> previousAppointmentList =
+                                previousAppointmentFunctions.get_one_doctor_unfilled_appointments(param1, param2);
+                        PreviousAppointmentTable pat = new PreviousAppointmentTable(previousAppointmentList);
+                        dTable.setModel(pat);
+                    }
+                }
+            }
         }
-
     }
     private void addData(int category){
         // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
@@ -449,5 +509,17 @@ public class DentistryFrame extends JFrame implements ActionListener {
             clinic_select.add(clinic_array[i]);
         }
         return clinic_array;
+    }
+    public JMenuItem[] doctor_filling(String clinic_name){
+        doctor_select.removeAll();
+        List<Entities.Dentist> dentistList = dentistFunctions.filter_by_clinic(clinic_name);
+        JMenuItem[] doc_array = new JMenuItem[dentistList.size()];
+        for (int i = 0; i < doc_array.length; i++){
+            doc_array[i] = new JMenuItem(dentistList.get(i).getDentist_name());
+            doc_array[i].setActionCommand(dentistList.get(i).getDentist_name());
+            doc_array[i].addActionListener(this);
+            doctor_select.add(doc_array[i]);
+        }
+        return doc_array;
     }
 }

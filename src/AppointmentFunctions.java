@@ -53,6 +53,83 @@ public class AppointmentFunctions extends BaseFunctions {
         }
         return null;
     }
+    public List<Entities.ForthcomingAppointment> filter_by_clinic(String clinic_name){
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                appointmentsList.clear();
+                try {
+                    LocalDate localDate = LocalDate.now();
+                    LocalTime localTime = LocalTime.now();
+                    Statement stmt = con.createStatement();
+                    String query = "select appointments.appointment_id, dentist.dentist_name, dentistry.dentistry_name,\n" +
+                            "appointments.appointment_day, appointments.appointment_time, appointments.patient from appointments \n" +
+                            "join dentist on appointments.dentist_id = dentist.dentist_id\n" +
+                            "join dentistry on dentist.dentistry_id = dentistry.dentistry_id\n" +
+                            "where appointments.appointment_day > '" + localDate + "' or (appointments.appointment_day = '" +
+                            localDate + "' and appointments.appointment_time > '" + localTime + "') and dentistry.dentistry_name = '" + clinic_name + "'";
+                    ResultSet rs = stmt.executeQuery(query);
+                    while (rs.next()) {
+                        appointment = new Entities.ForthcomingAppointment(rs.getInt(1), rs.getString(2),
+                                rs.getString(3), String.valueOf(rs.getDate(4)),
+                                String.valueOf(rs.getTime(5)), rs.getString(6));
+                        appointmentsList.add(appointment);
+
+                    }
+                    rs.close();
+                    stmt.close();
+
+                } finally {
+                    con.close();
+                }
+                return appointmentsList;
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
+    public List<Entities.ForthcomingAppointment> get_one_doctor_appointments(String clinic_name, String doctor_name){
+        String[] s = connect_to_db();
+        if (s != null) {
+            try (Connection con = DriverManager.getConnection(s[0],
+                    s[1], s[2])) {
+                appointmentsList.clear();
+                try {
+                    LocalDate localDate = LocalDate.now();
+                    LocalTime localTime = LocalTime.now();
+                    Statement stmt = con.createStatement();
+                    String query = "select appointments.appointment_id, dentist.dentist_name, dentistry.dentistry_name,\n" +
+                            "appointments.appointment_day, appointments.appointment_time, appointments.patient from appointments \n" +
+                            "join dentist on appointments.dentist_id = dentist.dentist_id\n" +
+                            "join dentistry on dentist.dentistry_id = dentistry.dentistry_id\n" +
+                            "where appointments.appointment_day > '" + localDate + "' or (appointments.appointment_day = '" +
+                            localDate + "' and appointments.appointment_time > '" + localTime + "') and dentistry.dentistry_name = '"
+                            + clinic_name + "' and dentist.dentist_name = '" + doctor_name + "'";
+                    ResultSet rs = stmt.executeQuery(query);
+                    while (rs.next()) {
+                        appointment = new Entities.ForthcomingAppointment(rs.getInt(1), rs.getString(2),
+                                rs.getString(3), String.valueOf(rs.getDate(4)),
+                                String.valueOf(rs.getTime(5)), rs.getString(6));
+                        appointmentsList.add(appointment);
+
+                    }
+                    rs.close();
+                    stmt.close();
+
+                } finally {
+                    con.close();
+                }
+                return appointmentsList;
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
 
     public void addAppointment(Entities.ForthcomingAppointment appointment) {
         String[] s = connect_to_db();
