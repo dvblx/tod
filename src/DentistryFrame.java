@@ -21,6 +21,9 @@ public class DentistryFrame extends JFrame implements ActionListener {
     private static final String FILLED = "Заполненные";
     private static final String UNFILLED = "Незаполненные";
     private final JTable dTable = new JTable();
+    private final JPanel btnPanel = new JPanel();
+    private final GridBagLayout gridbag = new GridBagLayout();
+    private final GridBagConstraints gbc = new GridBagConstraints();
     private int category = 1;
     private final DentistFunctions dentistFunctions = new DentistFunctions();
     private final DentistryFunctions dentistryFunctions = new DentistryFunctions();
@@ -35,14 +38,8 @@ public class DentistryFrame extends JFrame implements ActionListener {
 
     public DentistryFrame(){
         dTable.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        // Используем layout GridBagLayout
-        GridBagLayout gridbag = new GridBagLayout();
-        GridBagConstraints gbc = new GridBagConstraints();
-        // Каждый элемент является последним в строке
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        // Элемент раздвигается на весь размер ячейки
         gbc.fill = GridBagConstraints.BOTH;
-        // Но имеет границы - слева, сверху и справа по 5. Снизу - 0
         gbc.insets = new Insets(5, 5, 0, 5);
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Меню");
@@ -85,15 +82,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
         appointment_select.add(i2);
         appointment_select.setVisible(false);
         menuBar.add(appointment_select);
-        JPanel btnPanel = new JPanel();
         btnPanel.setLayout(gridbag);
-        btnPanel.add(createButton(gridbag, gbc, "Обновить", LOAD));
-        btnPanel.add(createButton(gridbag, gbc, "Добавить", ADD));
-        btnPanel.add(createButton(gridbag, gbc, "Исправить", EDIT));
-        btnPanel.add(createButton(gridbag, gbc, "Удалить", DELETE));
-        btnPanel.add(createButton(gridbag, gbc, "Сортировать", SORT));
-        btnPanel.add(createButton(gridbag, gbc, "Поиск", SEARCH));
-        btnPanel.add(createButton(gridbag, gbc, "Сохранить отчёт", REPORT));
         JPanel left = new JPanel();
         left.setLayout(new BorderLayout());
         left.add(btnPanel, BorderLayout.NORTH);
@@ -110,6 +99,32 @@ public class DentistryFrame extends JFrame implements ActionListener {
         button.addActionListener(this);
         gridbag.setConstraints(button, gbc);
         return button;
+    }
+    private void BuildButtons(){
+        // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
+        btnPanel.removeAll();
+        switch (category){
+            case 1, 3, 5 ->{
+                btnPanel.add(createButton(gridbag, gbc, "Обновить", LOAD));
+                btnPanel.add(createButton(gridbag, gbc, "Добавить", ADD));
+                btnPanel.add(createButton(gridbag, gbc, "Исправить", EDIT));
+                btnPanel.add(createButton(gridbag, gbc, "Удалить", DELETE));
+                btnPanel.add(createButton(gridbag, gbc, "Сохранить отчёт", REPORT));
+            }
+            case 2 ->{
+                btnPanel.add(createButton(gridbag, gbc, "Обновить", LOAD));
+                btnPanel.add(createButton(gridbag, gbc, "Добавить", ADD));
+                btnPanel.add(createButton(gridbag, gbc, "Исправить", EDIT));
+                btnPanel.add(createButton(gridbag, gbc, "Удалить", DELETE));
+                btnPanel.add(createButton(gridbag, gbc, "Сортировать", SORT));
+                btnPanel.add(createButton(gridbag, gbc, "Поиск", SEARCH));
+                btnPanel.add(createButton(gridbag, gbc, "Сохранить отчёт", REPORT));
+            }
+            case 4 -> {
+                btnPanel.add(createButton(gridbag, gbc, "Обновить", LOAD));
+                btnPanel.add(createButton(gridbag, gbc, "Сохранить отчёт", REPORT));
+            }
+        }
     }
 
     @Override
@@ -176,6 +191,7 @@ public class DentistryFrame extends JFrame implements ActionListener {
     }
     private void loadData(int number){
         // 1 - врачи, 2 - клиники, 3 - предстоящие приёмы, 4  - расписание, 5 - прошедшие приёмы
+        BuildButtons();
         doctor_select.setVisible(false);
         switch (number) {
             case 1 -> {
